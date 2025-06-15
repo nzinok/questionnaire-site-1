@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>שאלון אבחון תעסוקתי</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .progress-container {
+            background: rgba(255,255,255,0.2);
+            height: 8px;
+            border-radius: 4px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00f2fe, #4facfe);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .intro-screen {
+            padding: 40px;
+            text-align: center;
+        }
+
+        .intro-screen h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .intro-screen p {
+            color: #666;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .questionnaire-content {
+            padding: 40px;
+            display: none;
+        }
+
+        .category-section {
+            margin-bottom: 40px;
+            border: 2px solid #f0f0f0;
+            border-radius: 15px;
+            padding: 30px;
+            background: #fafafa;
+        }
+
+        .category-title {
+            color: #333;
+            font-size: 1.6rem;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #4facfe;
+            display: inline-block;
+        }
+
+        .question {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            color: #333;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .question-input input, .question-input select, .question-input textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .question-input input:focus, .question-input select:focus, .question-input textarea:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+
+        .rating-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .rating-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+        }
+
+        .rating-option:hover {
+            background-color: #f0f8ff;
+        }
+
+        .rating-option input[type="radio"] {
+            margin-bottom: 5px;
+            transform: scale(1.2);
+        }
+
+        .rating-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .navigation {
+            padding: 20px 40px;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4facfe;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .success-message {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-right: 4px solid #c33;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .questionnaire-content, .intro-screen {
+                padding: 20px;
+            }
+            
+            .rating-container {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>שאלון אבחון תעסוקתי</h1>
+            <p>מערכת מתקדמת לאבחון העדפות וכישורים תעסוקתיים</p>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+        </div>
+
+        <!-- מסך הקדמה -->
+        <div class="intro-screen" id="introScreen">
+            <h2>ברוכים הבאים לשאלון האבחון התעסוקתי</h2>
+            <p>השאלון מכיל מספר מקטעים שונים שנועדו לבחון את העדפותיכם, כישוריכם ונטיותיכם התעסוקתיות.</p>
+            <p>אנא השיבו על כל השאלות בכנות ובדיוק מרבי.</p>
+            <p>השאלון יקח כ-15-20 דקות למילוי.</p>
+            <button class="btn" onclick="startQuestionnaire()">התחל את השאלון</button>
+        </div>
+
+        <!-- טעינה -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <h3>טוען את השאלון...</h3>
+        </div>
+
+        <!-- תוכן השאלון -->
+        <div class="questionnaire-content" id="questionnaireContent">
+            <div id="questionsContainer"></div>
+        </div>
+
+        <!-- ניווט -->
+        <div class="navigation" id="navigation" style="display: none;">
+            <button class="btn" id="prevBtn" onclick="previousSection()" disabled>הקודם</button>
+            <span id="sectionInfo"></span>
+            <button class="btn" id="nextBtn" onclick="nextSection()">הבא</button>
+            <button class="btn" id="submitBtn" onclick="submitQuestionnaire()" style="display: none;">שלח תשובות</button>
+        </div>
+
+        <!-- הודעת הצלחה -->
+        <div class="success-message" id="successMessage">
+            <div class="success-icon">✅</div>
+            <h2>התשובות נשלחו בהצלחה!</h2>
+            <p>תודה על השתתפותך בשאלון</p>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+    </div>
+
+    <script>
+        // הגדרות קבועות - ערכים שלך
+        const SPREADSHEET_ID = '1iELW0Faiwvy3j8Z-k8YykFba5Wmmclal2OJG7IvymcA';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby5s0PiWYJZkVIJ8Fx6o-8fpQWCNdtGlJ6wAbyYVBTv7fnYRE_T7CwdpY9jdD9ILg41_g/exec';
+        
+        // משתנים גלובליים
+        let questionnaireData = {};
+        let currentSection = 0;
+        let sections = [];
+        let answers = {};
+
+        // התחלת השאלון
+        function startQuestionnaire() {
+            document.getElementById('introScreen').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            loadQuestionnaire();
+        }
+
+        // טעינת השאלון מ-Google Apps Script עם אבחון מפורט
+        async function loadQuestionnaire() {
+            try {
+                console.log('=== התחלת טעינת השאלון ===');
+                console.log('SPREADSHEET_ID:', SPREADSHEET_ID);
+                console.log('APPS_SCRIPT_URL:', APPS_SCRIPT_URL);
+                
+                // בדיקה ראשונית של ה-URL
+                const testUrl = `${APPS_SCRIPT_URL}?spreadsheetId=${SPREADSHEET_ID}&test=1`;
+                console.log('URL מלא לבדיקה:', testUrl);
+                
+                // הצגת מידע למשתמש
+                document.getElementById('loading').innerHTML = `
+                    <div class="spinner"></div>
+                    <h3>בודק חיבור לשרת...</h3>
+                    <p style="font-size: 0.9rem; color: #666; margin-top: 10px;">
+                        מתחבר ל-Google Apps Script...
+                    </p>
+                `;
+                
+                console.log('שולח בקשה לשרת...');
+                
+                const response = await fetch(testUrl, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                console.log('סטטוס תגובה:', response.status, response.statusText);
+                console.log('Headers:', Object.fromEntries(response.headers.entries()));
+                
+                if (!response.ok) {
+                    throw new Error(`שגיאה בתגובת השרת: ${response.status} - ${response.statusText}`);
+                }
+                
+                // נסה לקרוא את התוכן
+                let responseText;
+                try {
+                    responseText = await response.text();
+                    console.log('תוכן גולמי מהשרת:', responseText.substring(0, 500));
+                } catch (textError) {
+                    throw new Error('לא ניתן לקרוא את תוכן התגובה: ' + textError.message);
+                }
+                
+                // נסה להמיר ל-JSON
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                    console.log('נתונים שהתקבלו:', result);
+                } catch (jsonError) {
+                    console.error('שגיאה בהמרת JSON:', jsonError);
+                    console.error('תוכן שלא ניתן להמיר:', responseText);
+                    throw new Error('התגובה מהשרת אינה בפורמט JSON תקין');
+                }
+                
+                // בדיקת התקינות של התגובה
+                if (!result.success) {
+                    throw new Error(result.message || 'השרת החזיר שגיאה ללא הודעה');
+                }
+                
+                if (!result.data) {
+                    throw new Error('השרת לא החזיר נתוני שאלון');
+                }
+                
+                if (typeof result.data !== 'object' || Object.keys(result.data).length === 0) {
+                    throw new Error('נתוני השאלון ריקים או לא תקינים. וודא שיש גיליונות שמתחילים ב"שאלון:"');
+                }
+                
+                // הצלחה! עדכון הנתונים
+                questionnaireData = result.data;
+                sections = Object.keys(questionnaireData);
+                
+                console.log('=== טעינה הושלמה בהצלחה ===');
+                console.log('מספר מקטעים:', sections.length);
+                sections.forEach((section, index) => {
+                    const questionsCount = questionnaireData[section].length;
+                    console.log(`${index + 1}. ${section}: ${questionsCount} שאלות`);
+                });
+                
+                // בדיקה שיש לפחות מקטע אחד עם שאלות
+                let totalQuestions = 0;
+                sections.forEach(section => {
+                    totalQuestions += questionnaireData[section].length;
+                });
+                
+                if (totalQuestions === 0) {
+                    throw new Error('לא נמצאו שאלות בשום מקטע. בדוק את תוכן הגיליונות');
+                }
+                
+                console.log('סה"כ שאלות:', totalQuestions);
+                
+                // מעבר לשאלון
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('questionnaireContent').style.display = 'block';
+                document.getElementById('navigation').style.display = 'flex';
+                
+                displayCurrentSection();
+                
+            } catch (error) {
+                console.error('=== שגיאה בטעינת השאלון ===');
+                console.error('שגיאה:', error);
+                console.error('Stack:', error.stack);
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('introScreen').style.display = 'block';
+                
+                // הכנת הודעת שגיאה מפורטת
+                let errorMessage = '❌ שגיאה בטעינת השאלון:\n\n';
+                errorMessage += error.message + '\n\n';
+                
+                // הוספת הנחיות לפתרון
+                errorMessage += '🔧 נקודות לבדיקה:\n\n';
+                errorMessage += '1. ב-Google Apps Script:\n';
+                errorMessage += '   • וודא שהקוד נשמר\n';
+                errorMessage += '   • Deploy → New deployment → Web app\n';
+                errorMessage += '   • Execute as: Me\n';
+                errorMessage += '   • Who has access: Anyone\n\n';
+                
+                errorMessage += '2. בקובץ Google Sheets:\n';
+                errorMessage += '   • וודא שיש גיליונות שמתחילים ב"שאלון:"\n';
+                errorMessage += '   • כל גיליון צריך שאלות בעמודה A\n';
+                errorMessage += '   • הקובץ צריך להיות נגיש לכולם\n\n';
+                
+                errorMessage += '3. בדיקת חיבור:\n';
+                errorMessage += '   • נסה לפתוח את ה-URL בדפדפן:\n';
+                errorMessage += '   ' + APPS_SCRIPT_URL + '?spreadsheetId=' + SPREADSHEET_ID;
+                
+                showError(errorMessage);
+                
+                // הוספת כפתור לבדיקה ידנית
+                addManualTestButton();
+            }
+        }
+        
+        // הוספת כפתור לבדיקה ידנית
+        function addManualTestButton() {
+            const errorElement = document.getElementById('errorMessage');
+            const testButton = document.createElement('button');
+            testButton.className = 'btn';
+            testButton.textContent = 'בדוק חיבור ידנית';
+            testButton.style.marginTop = '15px';
+            testButton.onclick = function() {
+                const testUrl = APPS_SCRIPT_URL + '?spreadsheetId=' + SPREADSHEET_ID;
+                window.open(testUrl, '_blank');
+            };
+            errorElement.appendChild(document.createElement('br'));
+            errorElement.appendChild(testButton);
+        }
+
+        // הצגת המקטע הנוכחי
+        function displayCurrentSection() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            
+            if (sections.length === 0) return;
+            
+            const sectionName = sections[currentSection];
+            const questions = questionnaireData[sectionName] || [];
+            
+            console.log(`מציג מקטע: ${sectionName}, שאלות: ${questions.length}`);
+            
+            const sectionDiv = document.createElement('div');
+            sectionDiv.className = 'category-section';
+            
+            const titleDiv = document.createElement('div');
+            titleDiv.className = 'category-title';
+            titleDiv.textContent = sectionName;
+            sectionDiv.appendChild(titleDiv);
+            
+            questions.forEach((q, index) => {
+                const questionDiv = createQuestionElement(q, sectionName, index);
+                sectionDiv.appendChild(questionDiv);
+            });
+            
+            container.appendChild(sectionDiv);
+            
+            updateNavigation();
+            updateProgress();
+        }
+
+        // יצירת אלמנט שאלה
+        function createQuestionElement(questionData, sectionName, questionIndex) {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question';
+            
+            const questionText = document.createElement('div');
+            questionText.className = 'question-text';
+            questionText.textContent = questionData.question;
+            questionDiv.appendChild(questionText);
+            
+            const inputDiv = document.createElement('div');
+            inputDiv.className = 'question-input';
+            
+            const questionId = `${sectionName}_${questionIndex}`;
+            
+            switch (questionData.type.toLowerCase()) {
+                case 'טקסט':
+                    const textInput = document.createElement('textarea');
+                    textInput.id = questionId;
+                    textInput.rows = 3;
+                    textInput.placeholder = 'הכנס את תשובתך כאן...';
+                    textInput.value = answers[questionId] || '';
+                    textInput.onchange = () => saveAnswer(questionId, textInput.value);
+                    inputDiv.appendChild(textInput);
+                    break;
+                    
+                case 'מספר':
+                    const numberInput = document.createElement('input');
+                    numberInput.type = 'number';
+                    numberInput.id = questionId;
+                    numberInput.placeholder = 'הכנס מספר...';
+                    numberInput.value = answers[questionId] || '';
+                    numberInput.onchange = () => saveAnswer(questionId, numberInput.value);
+                    inputDiv.appendChild(numberInput);
+                    break;
+                    
+                case 'דירוג 1-5 1=כלל לא 5=מאד':
+                    const ratingContainer = document.createElement('div');
+                    ratingContainer.className = 'rating-container';
+                    
+                    for (let i = 1; i <= 5; i++) {
+                        const optionDiv = document.createElement('div');
+                        optionDiv.className = 'rating-option';
+                        
+                        const radio = document.createElement('input');
+                        radio.type = 'radio';
+                        radio.name = questionId;
+                        radio.value = i;
+                        radio.checked = answers[questionId] == i;
+                        radio.onchange = () => saveAnswer(questionId, i);
+                        
+                        const label = document.createElement('label');
+                        label.textContent = i;
+                        
+                        optionDiv.appendChild(radio);
+                        optionDiv.appendChild(label);
+                        ratingContainer.appendChild(optionDiv);
+                    }
+                    
+                    const labelsDiv = document.createElement('div');
+                    labelsDiv.className = 'rating-labels';
+                    labelsDiv.innerHTML = '<span>כלל לא</span><span>מאוד</span>';
+                    
+                    inputDiv.appendChild(ratingContainer);
+                    inputDiv.appendChild(labelsDiv);
+                    break;
+                    
+                case 'בחירה מתוך רשימה':
+                    const select = document.createElement('select');
+                    select.id = questionId;
+                    
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.textContent = 'בחר אפשרות...';
+                    select.appendChild(defaultOption);
+                    
+                    questionData.options.forEach(option => {
+                        const optionElement = document.createElement('option');
+                        optionElement.value = option;
+                        optionElement.textContent = option;
+                        if (answers[questionId] === option) {
+                            optionElement.selected = true;
+                        }
+                        select.appendChild(optionElement);
+                    });
+                    
+                    select.onchange = () => saveAnswer(questionId, select.value);
+                    inputDiv.appendChild(select);
+                    break;
+                    
+                default:
+                    // אם סוג השאלה לא מוכר, ברירת מחדל לטקסט
+                    const defaultInput = document.createElement('input');
+                    defaultInput.type = 'text';
+                    defaultInput.id = questionId;
+                    defaultInput.placeholder = 'הכנס תשובה...';
+                    defaultInput.value = answers[questionId] || '';
+                    defaultInput.onchange = () => saveAnswer(questionId, defaultInput.value);
+                    inputDiv.appendChild(defaultInput);
+                    break;
+            }
+            
+            questionDiv.appendChild(inputDiv);
+            return questionDiv;
+        }
+
+        // שמירת תשובה
+        function saveAnswer(questionId, value) {
+            answers[questionId] = value;
+            console.log(`נשמרה תשובה: ${questionId} = ${value}`);
+        }
+
+        // ניווט למקטע הבא
+        function nextSection() {
+            if (currentSection < sections.length - 1) {
+                currentSection++;
+                displayCurrentSection();
+            }
+        }
+
+        // ניווט למקטע הקודם
+        function previousSection() {
+            if (currentSection > 0) {
+                currentSection--;
+                displayCurrentSection();
+            }
+        }
+
+        // עדכון ניווט
+        function updateNavigation() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const submitBtn = document.getElementById('submitBtn');
+            const sectionInfo = document.getElementById('sectionInfo');
+            
+            prevBtn.disabled = currentSection === 0;
+            
+            if (currentSection === sections.length - 1) {
+                nextBtn.style.display = 'none';
+                submitBtn.style.display = 'inline-block';
+            } else {
+                nextBtn.style.display = 'inline-block';
+                submitBtn.style.display = 'none';
+            }
+            
+            sectionInfo.textContent = `מקטע ${currentSection + 1} מתוך ${sections.length}`;
+        }
+
+        // עדכון סרגל התקדמות
+        function updateProgress() {
+            const progress = ((currentSection + 1) / sections.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        // שליחת השאלון
+        async function submitQuestionnaire() {
+            try {
+                console.log('מתחיל שליחת תשובות...');
+                
+                // בדיקה שיש תשובות
+                if (Object.keys(answers).length === 0) {
+                    showError('לא נמצאו תשובות לשליחה');
+                    return;
+                }
+                
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('questionnaireContent').style.display = 'none';
+                document.getElementById('navigation').style.display = 'none';
+                
+                // הכנת הנתונים לשליחה
+                const submissionData = {
+                    spreadsheetId: SPREADSHEET_ID,
+                    timestamp: new Date().toLocaleString('he-IL'),
+                    answers: answers
+                };
+                
+                console.log('שולח נתונים:', submissionData);
+                
+                // שליחה ל-Google Apps Script
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(submissionData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`שגיאה בשליחה: ${response.status} - ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                console.log('תשובה מהשרת:', result);
+                
+                if (!result.success) {
+                    throw new Error(result.message || 'שגיאה בשמירת התשובות');
+                }
+                
+                // הצלחה!
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('successMessage').style.display = 'block';
+                console.log('התשובות נשלחו בהצלחה!');
+                
+            } catch (error) {
+                console.error('שגיאה בשליחת התשובות:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('questionnaireContent').style.display = 'block';
+                document.getElementById('navigation').style.display = 'flex';
+                
+                let errorMessage = 'שגיאה בשליחת התשובות:\n\n' + error.message;
+                errorMessage += '\n\nנא לבדוק שה-Google Apps Script פועל נכון';
+                showError(errorMessage);
+            }
+        }
+
+        // הצגת שגיאה
+        function showError(message) {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            
+            // הסתרה אוטומטית אחרי 15 שניות
+            setTimeout(() => {
+                errorElement.style.display = 'none';
+            }, 15000);
+        }
+
+        // אתחול כשהדף נטען
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('השאלון מוכן לפעולה');
+            console.log('Spreadsheet ID:', SPREADSHEET_ID);
+            console.log('Apps Script URL:', APPS_SCRIPT_URL);
+        });
+    </script>
+</body>
+</html>
